@@ -1,41 +1,59 @@
-package com.interview.photon.viewmodel
-
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.interview.photon.model.NewYorkSchool
-import com.interview.photon.model.NewYorkSchoolApiInterface
 import com.interview.photon.model.NewYorkSchoolRepository
-import com.interview.photon.model.RetrofitInstance
-import junit.framework.TestCase.assertTrue
-import kotlinx.coroutines.runBlocking
+import com.interview.photon.viewmodel.NewyorkSchoolViewModel
+import io.mockk.coEvery
+import io.mockk.mockk
+import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
+import org.mockito.junit.MockitoJUnitRunner
 
-
+@RunWith(MockitoJUnitRunner::class)
 class NewyorkSchoolViewModelTest {
 
-   lateinit var repository: NewYorkSchoolRepository
-   lateinit var viewModel: NewyorkSchoolViewModel
+    @Rule
+    @JvmField
+    val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-   @Before
-   fun setUp(){
-       val retrofit =
-           Retrofit.Builder()
-               .baseUrl("https://data.cityofnewyork.us/resource/s3k6-pzi2.json")
-               .addConverterFactory(GsonConverterFactory.create())
-               .build()
-       val apiService = retrofit.create(NewYorkSchoolApiInterface::class.java)
-       viewModel = NewyorkSchoolViewModel(repository)
-   }
+    private val testDispatcher = TestCoroutineDispatcher()
 
-    @Test
-    fun  fetchNewYorkSchoolTest(){
-        viewModel.fetchNySchool()
-        val school = viewModel.nySchool.value
-        school?.let { assertTrue(it.isNotEmpty()) }
+    private val repository: NewYorkSchoolRepository = mockk()
+
+    private lateinit var viewModel: NewyorkSchoolViewModel
+
+    @Before
+    fun setUp() {
+        Dispatchers.setMain(testDispatcher)
+        viewModel = NewyorkSchoolViewModel(repository)
     }
 
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+        testDispatcher.cleanupTestCoroutines()
+    }
+
+    @Test
+    fun `fetchNySchool should update LiveData with fetched schools`() {
+        // Given
+        val mockSchools = listOf(
+            NewYorkSchool("dbn", "School 1", "123", "Overview 1"),
+            NewYorkSchool("dbn", "School 2", "456", "Overview 2")
+        )
+        coEvery { repository.getNewYorkSchool() } returns mockSchools
+
+        // When
+        viewModel.fetchNySchool()
+
+        // Then
+        assertEquals(mockSchools, viewModel.nySchool.value)
+    }
 }
