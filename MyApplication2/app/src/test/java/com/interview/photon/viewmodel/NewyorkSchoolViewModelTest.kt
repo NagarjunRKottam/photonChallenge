@@ -6,39 +6,31 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.junit.MockitoJUnitRunner
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(MockitoJUnitRunner::class)
 class NewyorkSchoolViewModelTest {
 
     @Rule
     @JvmField
     val instantTaskExecutorRule = InstantTaskExecutorRule()
-
     private val testDispatcher = TestCoroutineDispatcher()
-
     private val repository: NewYorkSchoolRepository = mockk()
-
     private lateinit var viewModel: NewyorkSchoolViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        viewModel = NewyorkSchoolViewModel(repository)
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-        testDispatcher.cleanupTestCoroutines()
+        viewModel = NewyorkSchoolViewModel()
+        viewModel.setRepository(repository)
     }
 
     @Test

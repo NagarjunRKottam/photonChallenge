@@ -9,19 +9,21 @@ import com.interview.photon.model.NewYorkSchool
 import com.interview.photon.model.NewYorkSchoolRepository
 import kotlinx.coroutines.launch
 
-class NewyorkSchoolViewModel(private val repository: NewYorkSchoolRepository) : ViewModel(){
-
+class NewyorkSchoolViewModel : ViewModel() {
+    private var repository: NewYorkSchoolRepository = NewYorkSchoolRepository()
     private val _nySchool = MutableLiveData<List<NewYorkSchool>>()
-    val nySchool : LiveData<List<NewYorkSchool>> = _nySchool
+    val nySchool: LiveData<List<NewYorkSchool>> = _nySchool
+    fun setRepository(repo: NewYorkSchoolRepository) {
+        repository = repo
+    }
 
-    fun fetchNySchool(){
+    fun fetchNySchool() {
         viewModelScope.launch {
             try {
                 _nySchool.value = repository.getNewYorkSchool()
-            } catch (ex: Exception){
+            } catch (ex: Exception) {
                 Log.d("TAG", "fetchNySchool: " + ex.message)
             }
         }
     }
-
 }
