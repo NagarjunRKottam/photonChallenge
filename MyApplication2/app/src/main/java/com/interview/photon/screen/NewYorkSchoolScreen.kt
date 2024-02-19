@@ -26,14 +26,14 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.interview.photon.model.NewYorkSchool
 import com.interview.photon.navigation.ScreenRoute
-import com.interview.photon.viewmodel.NewyorkSchoolViewModel
+import com.interview.photon.viewmodel.NewYorkSchoolViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewYorkSchoolScreen(
     navController: NavController,
-    viewModel: NewyorkSchoolViewModel
+    viewModel: NewYorkSchoolViewModel
 ) {
     val nySchool by viewModel.nySchool.observeAsState(emptyList())
     LaunchedEffect(Unit) {

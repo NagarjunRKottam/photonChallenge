@@ -1,5 +1,6 @@
 package com.interview.photon.navigation
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -9,13 +10,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.interview.photon.screen.NewYorkSchoolDetails
 import com.interview.photon.screen.NewYorkSchoolScreen
-import com.interview.photon.viewmodel.NewyorkSchoolViewModel
+import com.interview.photon.viewmodel.NewYorkSchoolViewModel
 
 const val DETAILS_ARGUMENT_KEY = "details"
 
+//sealed class for screen routes
 sealed class ScreenRoute(val route: String) {
-    data object Home : ScreenRoute("home_screen")
-    data object Details : ScreenRoute("details_screen/{$DETAILS_ARGUMENT_KEY}") {
+    object Home : ScreenRoute("home_screen")
+    object Details : ScreenRoute("details_screen/{$DETAILS_ARGUMENT_KEY}") {
         fun passDetails(details: String): String {
             return "details_screen/$details"
         }
@@ -28,8 +30,9 @@ fun NavGraph(navController: NavHostController) {
         navController = navController,
         startDestination = ScreenRoute.Home.route
     ) {
+        //The Home screen composable
         composable(route = ScreenRoute.Home.route) {
-            val viewModel = viewModel<NewyorkSchoolViewModel>()
+            val viewModel = viewModel<NewYorkSchoolViewModel>()
             NewYorkSchoolScreen(
                 navController = navController,
                 viewModel = viewModel
@@ -41,11 +44,14 @@ fun NavGraph(navController: NavHostController) {
                 type = NavType.StringType
             })
         ) { backStackEntry ->
-            val schoolDetails = requireNotNull(
-                backStackEntry.arguments?.getString(DETAILS_ARGUMENT_KEY)
-            )
-            NewYorkSchoolDetails(navController, schoolDetails)
+            val schoolDetails = backStackEntry.arguments?.getString(DETAILS_ARGUMENT_KEY)
+            if (schoolDetails != null) {
+                // Navigate to the Details screen
+                NewYorkSchoolDetails(navController, schoolDetails)
+            } else {
+                // Handle the case where schoolDetails is null
+                Log.e("NavGraph", "School details is null")
+            }
         }
     }
 }
-
